@@ -4,10 +4,14 @@ from flask import Flask
 import time
 from threading import Thread
 
-# 🔑 Твій токен (Koyeb -> Environment Variables -> TELEGRAM_TOKEN)
-TOKEN = os.getenv("TELEGRAM_TOKEN")
+# 🔑 Підхоплюємо токен з Environment Variable
+TOKEN = os.environ.get("TELEGRAM_TOKEN")
 
-# Бот з більшим таймаутом, щоб уникнути ReadTimeout
+# Перевірка токена перед стартом
+if not TOKEN:
+    raise ValueError("❌ TELEGRAM_TOKEN не знайдено. Перевір Environment Variables на Koyeb!")
+
+# Створюємо бота з більшим таймаутом
 bot = telebot.TeleBot(TOKEN, request_timeout=60)
 app = Flask(__name__)
 
@@ -23,7 +27,7 @@ def greet_new_member(message):
         )
         bot.send_message(message.chat.id, text)
 
-# 🌐 Flask-сервер для підтримки Koyeb health check
+# 🌐 Flask-сервер для підтримки health check
 @app.route('/')
 def home():
     return "Бот працює стабільно 🚀"
