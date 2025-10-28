@@ -1,11 +1,14 @@
 import telebot
 import os
 from flask import Flask
+import time
+from threading import Thread
 
 # 🔑 Твій токен (вкажи свій у Koyeb -> Environment Variables -> TELEGRAM_TOKEN)
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 
-bot = telebot.TeleBot(TOKEN)
+# Створюємо бота з більшим таймаутом, щоб уникнути ReadTimeout
+bot = telebot.TeleBot(TOKEN, request_timeout=60)
 app = Flask(__name__)
 
 # 🖐️ Привітання нових учасників
@@ -25,8 +28,18 @@ def greet_new_member(message):
 def home():
     return "Бот працює стабільно 🚀"
 
+# Функція для запуску бота з нескінченним опитуванням і обробкою помилок
+def run_bot():
+    while True:
+        try:
+            bot.infinity_polling()
+        except Exception as e:
+            print(f"⚠️ Помилка: {e}. Перезапуск через 5 секунд...")
+            time.sleep(5)
+
 if __name__ == "__main__":
     print("✅ Бот запущений і працює 24/7...")
-    from threading import Thread
-    Thread(target=lambda: bot.polling(none_stop=True, interval=0, timeout=20)).start()
+    # Запускаємо бота в окремому потоці
+    Thread(target=run_bot).start()
+    # Запускаємо Flask для підтримки хостингу
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
