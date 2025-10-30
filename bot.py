@@ -17,6 +17,7 @@ apihelper.TIMEOUT = 60
 
 app = Flask(__name__)
 
+# 🟢 Вітання нових учасників
 @bot.message_handler(content_types=['new_chat_members'])
 def greet_new_member(message):
     for new_member in message.new_chat_members:
@@ -27,6 +28,14 @@ def greet_new_member(message):
             f"Закидай фотку свого VAG, хай всі оцінять 🚗💨😉"
         )
         bot.send_message(message.chat.id, text)
+
+# 🔴 Повідомлення, коли учасник виходить або його видаляють
+@bot.message_handler(content_types=['left_chat_member'])
+def member_left(message):
+    user = message.left_chat_member
+    mention = f"@{user.username}" if user.username else user.first_name
+    text = f"😢 {mention} покинув(ла) нашу команду. Бажаємо гарної дороги й побачимось на зустрічах! 🚗💨"
+    bot.send_message(message.chat.id, text)
 
 @app.route('/')
 def home():
